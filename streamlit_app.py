@@ -1,49 +1,53 @@
 import pandas as pd
-from sklearn.linear_model import LassoCV
+from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_squared_error, r2_score
-import streamlit as st
-import matplotlib.pyplot as plt
 
-# Load the dataset and model
-df = pd.read_csv("Adulterant-dataset.csv")
+# Load the dataset
+df = pd.read_csv("Data Sets\\Adulterant-dataset.csv")
+
 X = df[['ml', 'F', 'D', 'L', 'S', 'P', 'W']]
 y = df['target']
 
-# Train the LassoCV model
+# Split the data
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
+
+# Scale the data
 scaler = StandardScaler()
-X_scaled = scaler.fit_transform(X)
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
 
-lasso_cv_model = LassoCV(cv=2)
-lasso_cv_model.fit(X_scaled, y)
+# Train a Linear Regression model
+model = LinearRegression()
+model.fit(X_train, y_train)
 
-# Streamlit user interface
-st.title("Milk Adulterant Prediction")
+# Predict on a custom input
+input_data = pd.DataFrame([[0.027, 6.6, 19.89, 3.06, 6.73, 2.37, 0]], columns=['ml', 'F', 'D', 'L', 'S', 'P', 'W'])
+pred_value = model.predict(input_data)[0]
 
-# Input features from the user
-ml = st.number_input("ml", min_value=0.0)
-F = st.number_input("F", min_value=0.0)
-D = st.number_input("D", min_value=0.0)
-L = st.number_input("L", min_value=0.0)
-S = st.number_input("S", min_value=0.0)
-P = st.number_input("P", min_value=0.0)
-W = st.number_input("W", min_value=0.0)
+# Function to map prediction ranges to conditions
+def map_condition(pred):
+    if 0 <= pred <= 1.5:
+        return "Starch"
+    elif 1.6 <= pred <= 2.5:
+        return "Sucrose"
+    elif 2.6 <= pred <= 3.5:
+        return "NaNO3"
+    elif 3.6 <= pred <= 4.5:
+        return "Urea"
+    elif 4.6 <= pred <= 5.5:
+        return "Glucose"
+    elif 5.6 <= pred <= 6.5:
+        return "NaCl"
+    elif 6.6 <= pred <= 7.5:
+        return "Formaldehyde"
+    else:
+        return "Unknown"
 
-# Predict the output
-user_input = [[ml, F, D, L, S, P, W]]
-user_input_scaled = scaler.transform(user_input)  # Scale the user input
-predicted_value = lasso_cv_model.predict(user_input_scaled)
+# Map the predicted value
+condition = map_condition(pred_value)
 
-# Show the predicted value
-st.write(f"Predicted Value: {predicted_value[0]}")
-
-# Plotting (Optional)
-if st.button('Plot True vs Predicted'):
-    y_pred_test = lasso_cv_model.predict(X_scaled)
-    
-    plt.scatter(y, y_pred_test, color='blue')
-    plt.plot([min(y), max(y)], [min(y), max(y)], color='red', linestyle='--')
-    plt.xlabel('True Values')
-    plt.ylabel('Predicted Values')
-    plt.title('True vs Predicted Values')
-    st.pyplot(plt)
+# Output the prediction and condition
+print(f"Predicted Value: {pred_value}")
+print(f"Condition: {condition}")
