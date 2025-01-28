@@ -6,7 +6,7 @@ import streamlit as st
 import matplotlib.pyplot as plt
 
 # Load the dataset and model
-df = pd.read_csv("Data Sets\\Adulterant-dataset.csv")
+df = pd.read_csv("Adulterant-dataset.csv")
 X = df[['ml', 'F', 'D', 'L', 'S', 'P', 'W']]
 y = df['target']
 
