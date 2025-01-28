@@ -5,7 +5,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_squared_error, r2_score
 
 # Load the dataset
-df = pd.read_csv("Data Sets\\Adulterant-dataset.csv")
+df = pd.read_csv("Adulterant-dataset.csv")
 
 X = df[['ml', 'F', 'D', 'L', 'S', 'P', 'W']]
 y = df['target']
