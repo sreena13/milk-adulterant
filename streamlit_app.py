@@ -1,32 +1,41 @@
+import streamlit as st
 import pandas as pd
-from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet
-from sklearn.model_selection import train_test_split
+import joblib
+from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import mean_squared_error, r2_score
 
-# Load the dataset
-df = pd.read_csv("Adulterant-dataset.csv")
+# Load dataset
+try:
+    df = pd.read_csv("Data Sets/Adulterant-dataset.csv")
+except FileNotFoundError:
+    st.error("Dataset not found! Please check the file path.")
+    st.stop()
 
 X = df[['ml', 'F', 'D', 'L', 'S', 'P', 'W']]
 y = df['target']
 
-# Split the data
-X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
-
 # Scale the data
 scaler = StandardScaler()
-X_train_scaled = scaler.fit_transform(X_train)
-X_test_scaled = scaler.transform(X_test)
+X_scaled = scaler.fit_transform(X)
 
-# Train a Linear Regression model
+# Train Linear Regression model
 model = LinearRegression()
-model.fit(X_train, y_train)
+model.fit(X, y)
 
-# Predict on a custom input
-input_data = pd.DataFrame([[0.027, 6.6, 19.89, 3.06, 6.73, 2.37, 0]], columns=['ml', 'F', 'D', 'L', 'S', 'P', 'W'])
-pred_value = model.predict(input_data)[0]
+# Streamlit UI
+st.title("Adulterant Detection System")
+st.write("Enter the values to predict the type of adulterant:")
 
-# Function to map prediction ranges to conditions
+# Input fields
+ml = st.number_input("ml", value=0.027, format="%.3f")
+F = st.number_input("F", value=6.6, format="%.2f")
+D = st.number_input("D", value=19.89, format="%.2f")
+L = st.number_input("L", value=3.06, format="%.2f")
+S = st.number_input("S", value=6.73, format="%.2f")
+P = st.number_input("P", value=2.37, format="%.2f")
+W = st.number_input("W", value=0.0, format="%.2f")
+
+# Prediction function
 def map_condition(pred):
     if 0 <= pred <= 1.5:
         return "Starch"
@@ -45,9 +54,9 @@ def map_condition(pred):
     else:
         return "Unknown"
 
-# Map the predicted value
-condition = map_condition(pred_value)
-
-# Output the prediction and condition
-print(f"Predicted Value: {pred_value}")
-print(f"Condition: {condition}")
+if st.button("Predict"):
+    input_data = pd.DataFrame([[ml, F, D, L, S, P, W]], columns=['ml', 'F', 'D', 'L', 'S', 'P', 'W'])
+    pred_value = model.predict(input_data)[0]
+    condition = map_condition(pred_value)
+    st.success(f"Predicted Value: {pred_value:.2f}")
+    st.info(f"Condition: {condition}")
