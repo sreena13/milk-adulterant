@@ -6,7 +6,7 @@ from sklearn.preprocessing import StandardScaler
 
 # Load dataset
 try:
-    df = pd.read_csv("Data Sets/Adulterant-dataset.csv")
+    df = pd.read_csv("Adulterant-dataset.csv")
 except FileNotFoundError:
     st.error("Dataset not found! Please check the file path.")
     st.stop()
